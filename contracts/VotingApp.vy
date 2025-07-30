@@ -104,14 +104,6 @@ def winnerName() -> String[100]:
     return self.proposals[self._winningProposal()].name
 
 
-@view
-@internal
-def _delegated(addr: address) -> bool:
-    """
-    Internal helper to check if a voter has delegated their vote.
-    """
-    return self.voters[addr].delegate != empty(address)
-
 @external
 def delegate(to: address):
     # Ensure the sender has not already voted
@@ -130,6 +122,14 @@ def delegate(to: address):
     # Forward voting weight to the delegate
     self._forwardWeight(msg.sender)
 
+
+@view
+@internal
+def _delegated(addr: address) -> bool:
+    """
+    Internal helper to check if a voter has delegated their vote.
+    """
+    return self.voters[addr].delegate != empty(address)
 
 @view
 @external
@@ -189,4 +189,3 @@ def _forwardWeight(delegate_with_weight_to_forward: address):
     if self._directlyVoted(target):
         self.proposals[self.voters[target].vote].voteCount += weight_to_forward
         self.voters[target].weight = 0
-
