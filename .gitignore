@@ -49,12 +49,12 @@ dist/
 *.log
 
 # -------------------
-# Ethereum / Web3 / Ape Framework
+# Ape Framework / Ethereum / Web3
 # -------------------
 .cache/               # Ape Framework cache
 .build/               # Compiled contracts
 .deployments/         # Deployment info
-.apetemp/             # Temp files for Ape
+.apetemp/             # Temporary files for Ape
 .ape/                 # Ape local data
 *.vyc                 # Compiled Vyper bytecode
 *.abi                 # Contract ABI files
