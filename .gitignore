@@ -1,0 +1,44 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
+
+# Environment variables & secrets
+.env
+.env.*
+
+# IDE & editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Build / distribution files
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Logs
+*.log
+
+# Ethereum / Web3 related
+keystore/
+keys/
+wallet.json
+
+# Node.js (if you use frontend)
+node_modules/
+package-lock.json
