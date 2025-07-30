@@ -9,3 +9,8 @@ def deployer(accounts):
 @pytest.fixture
 def contract(deployer, project):
     return deployer.deploy(project.VotingApp)
+
+
+@pytest.fixture
+def delegate_contract(deployer, project):
+    return deployer.deploy(project.VotingApp)

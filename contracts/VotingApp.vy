@@ -112,6 +112,25 @@ def _delegated(addr: address) -> bool:
     """
     return self.voters[addr].delegate != empty(address)
 
+@external
+def delegate(to: address):
+    # Ensure the sender has not already voted
+    assert not self.voters[msg.sender].voted, "Already voted"
+
+    # Prevent self-delegation
+    assert to != msg.sender, "Cannot delegate to yourself"
+
+    # Ensure valid delegate address
+    assert to != empty(address), "Invalid delegate address"
+
+    # Mark the sender as having voted and set delegate
+    self.voters[msg.sender].voted = True
+    self.voters[msg.sender].delegate = to
+
+    # Forward voting weight to the delegate
+    self._forwardWeight(msg.sender)
+
+
 @view
 @external
 def delegated(addr: address) -> bool:
@@ -170,3 +189,4 @@ def _forwardWeight(delegate_with_weight_to_forward: address):
     if self._directlyVoted(target):
         self.proposals[self.voters[target].vote].voteCount += weight_to_forward
         self.voters[target].weight = 0
+

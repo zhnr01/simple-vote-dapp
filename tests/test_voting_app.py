@@ -144,3 +144,137 @@ def test_winnerName(contract, deployer, accounts):
     # Verify winning proposal name
     assert contract.winnerName() == "mountain"
 
+
+import pytest
+from ape.exceptions import ContractLogicError
+
+
+def test_delegate(delegate_contract, deployer, accounts):
+    user = accounts[1]
+    user2 = accounts[2]
+
+    # Give voting rights
+    delegate_contract.giveRightToVote(user, 1, sender=deployer)
+    delegate_contract.giveRightToVote(user2, 2, sender=deployer)
+
+    # Initial assertions
+    assert delegate_contract.voters(user).weight == 1
+    assert not delegate_contract.voters(user).voted
+    assert delegate_contract.voters(user).vote == 0
+
+    assert delegate_contract.voters(user2).weight == 2
+    assert not delegate_contract.voters(user2).voted
+    assert delegate_contract.voters(user2).vote == 0
+
+    # Delegate from user2 → user
+    delegate_contract.delegate(user, sender=user2)
+
+    # After delegation
+    assert delegate_contract.voters(user).weight == 3
+    assert not delegate_contract.voters(user).voted
+    assert delegate_contract.voters(user).vote == 0
+
+    assert delegate_contract.voters(user2).weight == 0
+    assert delegate_contract.voters(user2).voted
+    assert delegate_contract.voters(user2).vote == 0
+
+
+def test_delegate_2_levels(delegate_contract, deployer, accounts):
+    user = accounts[1]
+    user2 = accounts[2]
+    user3 = accounts[3]
+
+    # Give voting rights
+    delegate_contract.giveRightToVote(user, 1, sender=deployer)
+    delegate_contract.giveRightToVote(user2, 2, sender=deployer)
+    delegate_contract.giveRightToVote(user3, 5, sender=deployer)
+
+    # Initial checks
+    assert delegate_contract.voters(user).weight == 1
+    assert delegate_contract.voters(user2).weight == 2
+    assert delegate_contract.voters(user3).weight == 5
+
+    # Delegate chain: user3 → user2 → user
+    delegate_contract.delegate(user, sender=user2)
+    delegate_contract.delegate(user2, sender=user3)
+
+    # Final weights
+    assert delegate_contract.voters(user).weight == 8
+    assert delegate_contract.voters(user2).weight == 0
+    assert delegate_contract.voters(user3).weight == 0
+
+    # Voting status
+    assert not delegate_contract.voters(user).voted
+    assert delegate_contract.voters(user2).voted
+    assert delegate_contract.voters(user3).voted
+
+
+def test_vote_after_delegate_2_levels(delegate_contract, deployer, accounts):
+    # Add proposals
+    delegate_contract.addProposal("beach", sender=deployer)
+    delegate_contract.addProposal("mountain", sender=deployer)
+
+    user = accounts[1]
+    user2 = accounts[2]
+    user3 = accounts[3]
+
+    # Give rights
+    delegate_contract.giveRightToVote(user, 1, sender=deployer)
+    delegate_contract.giveRightToVote(user2, 2, sender=deployer)
+    delegate_contract.giveRightToVote(user3, 5, sender=deployer)
+
+    # Delegate chain
+    delegate_contract.delegate(user, sender=user2)
+    delegate_contract.delegate(user2, sender=user3)
+
+    # User votes
+    delegate_contract.vote(1, sender=user)
+
+    # Assertions
+    assert delegate_contract.voters(user).weight == 0
+    assert delegate_contract.voters(user).voted
+    assert delegate_contract.voters(user).vote == 1
+    assert delegate_contract.proposals(0).voteCount == 0
+    assert delegate_contract.proposals(1).voteCount == 8
+    assert delegate_contract.winnerName() == "mountain"
+
+
+def test_delegate_after_vote(delegate_contract, deployer, accounts):
+    # Add proposals
+    delegate_contract.addProposal("beach", sender=deployer)
+    delegate_contract.addProposal("mountain", sender=deployer)
+
+    user = accounts[1]
+    user2 = accounts[2]
+    user3 = accounts[3]
+
+    # Give rights
+    delegate_contract.giveRightToVote(user, 1, sender=deployer)
+    delegate_contract.giveRightToVote(user2, 2, sender=deployer)
+    delegate_contract.giveRightToVote(user3, 5, sender=deployer)
+
+    # User votes before delegation
+    delegate_contract.vote(1, sender=user)
+
+    # Delegations after vote
+    delegate_contract.delegate(user, sender=user2)
+    delegate_contract.delegate(user2, sender=user3)
+
+    # Final checks
+    assert delegate_contract.voters(user).weight == 0
+    assert delegate_contract.voters(user).voted
+    assert delegate_contract.voters(user).vote == 1
+
+    assert delegate_contract.voters(user2).weight == 0
+    assert delegate_contract.voters(user2).voted
+    assert delegate_contract.voters(user2).delegate == user
+
+    assert delegate_contract.voters(user3).weight == 0
+    assert delegate_contract.voters(user3).voted
+    assert delegate_contract.voters(user3).delegate == user2
+
+    # Winner check
+    assert delegate_contract.proposals(0).voteCount == 0
+    assert delegate_contract.proposals(1).voteCount == 8
+    assert delegate_contract.winnerName() == "mountain"
+
