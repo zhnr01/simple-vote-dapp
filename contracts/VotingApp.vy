@@ -3,6 +3,8 @@ struct Voter:
     weight: uint256
     voted: bool
     vote: uint256
+    delegate: address
+
 
 struct Proposal:
     name: String[100]
@@ -100,3 +102,71 @@ def winningProposal() -> uint256:
 @external
 def winnerName() -> String[100]:
     return self.proposals[self._winningProposal()].name
+
+
+@view
+@internal
+def _delegated(addr: address) -> bool:
+    """
+    Internal helper to check if a voter has delegated their vote.
+    """
+    return self.voters[addr].delegate != empty(address)
+
+@view
+@external
+def delegated(addr: address) -> bool:
+    """
+    External view function to check if a given address has delegated.
+    """
+    return self._delegated(addr)
+
+@view
+@internal
+def _directlyVoted(addr: address) -> bool:
+    """
+    Internal helper to check if a voter has directly voted
+    without delegating their vote.
+    """
+    return self.voters[addr].voted and self.voters[addr].delegate == empty(address)
+
+
+@view
+@external
+def directlyVoted(addr: address) -> bool:
+    """
+    External view function to check if a given address has directly voted.
+    """
+    return self._directlyVoted(addr)
+
+@internal
+def _forwardWeight(delegate_with_weight_to_forward: address):
+    """
+    Forward voting weight from a delegator to the final delegate target.
+
+    Args:
+        delegate_with_weight_to_forward: The address whose voting weight
+        should be forwarded.
+    """
+    # Ensure the address has delegated and has weight to forward
+    assert self._delegated(delegate_with_weight_to_forward)
+    assert self.voters[delegate_with_weight_to_forward].weight > 0
+
+    # Start with their delegate
+    target: address = self.voters[delegate_with_weight_to_forward].delegate
+
+    # Follow the chain of delegations (max depth: 4 to prevent loops)
+    for i in range(4):
+        if self._delegated(target):
+            target = self.voters[target].delegate
+        else:
+            break
+
+    # Transfer the voting weight
+    weight_to_forward: uint256 = self.voters[delegate_with_weight_to_forward].weight
+    self.voters[delegate_with_weight_to_forward].weight = 0
+    self.voters[target].weight += weight_to_forward
+
+    # If target already voted directly, immediately apply weight to their chosen proposal
+    if self._directlyVoted(target):
+        self.proposals[self.voters[target].vote].voteCount += weight_to_forward
+        self.voters[target].weight = 0
