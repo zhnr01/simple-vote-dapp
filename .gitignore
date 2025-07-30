@@ -1,44 +1,74 @@
+# -------------------
 # Python cache and compiled files
+# -------------------
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 *.pkl
 
-# Virtual environment
+# -------------------
+# Virtual environments
+# -------------------
 venv/
 env/
 .venv/
 ENV/
 
+# -------------------
 # Environment variables & secrets
+# -------------------
 .env
 .env.*
 
+# -------------------
 # IDE & editor settings
+# -------------------
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
 
+# -------------------
 # OS-specific files
+# -------------------
 .DS_Store
 Thumbs.db
 
+# -------------------
 # Build / distribution files
+# -------------------
 build/
 dist/
 *.egg-info/
 .eggs/
 
+# -------------------
 # Logs
+# -------------------
 *.log
 
-# Ethereum / Web3 related
+# -------------------
+# Ethereum / Web3 / Ape Framework
+# -------------------
+.cache/               # Ape Framework cache
+.build/               # Compiled contracts
+.deployments/         # Deployment info
+.apetemp/             # Temp files for Ape
+.ape/                 # Ape local data
+*.vyc                 # Compiled Vyper bytecode
+*.abi                 # Contract ABI files
+ape-config.yaml.local # Local config overrides
+
+# -------------------
+# Keys and wallet files
+# -------------------
 keystore/
 keys/
 wallet.json
 
+# -------------------
 # Node.js (if you use frontend)
+# -------------------
 node_modules/
 package-lock.json
