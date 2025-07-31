@@ -1,1 +1,9 @@
-name: Voting App
+ethereum:
+  sepolia:
+    default_provider: alchemy
+
+providers:
+  alchemy:
+    ethereum:
+      sepolia:
+        uri: https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}
