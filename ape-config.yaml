@@ -1,9 +1,4 @@
 ethereum:
-  sepolia:
-    default_provider: alchemy
+  local:
+    uri: http://127.0.0.1:8545
 
-providers:
-  alchemy:
-    ethereum:
-      sepolia:
-        uri: https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}

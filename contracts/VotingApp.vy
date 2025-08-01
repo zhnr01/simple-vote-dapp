@@ -1,4 +1,5 @@
-# @version ^0.3.0
+# @version ^0.3.0 
+
 struct Voter:
     weight: uint256
     voted: bool
