@@ -1,4 +1,4 @@
-# @version ^0.3.0 
+# @version ^0.4.3
 
 struct Voter:
     weight: uint256
@@ -20,7 +20,7 @@ amountProposals: public(uint256)
 
 MAX_NUM_PROPOSALS: constant(uint256) = 3
 
-@external
+@deploy
 def __init__():
     self.chairperson = msg.sender
 
@@ -33,10 +33,7 @@ def addProposal(_proposalName: String[100]):
     i: uint256 = self.amountProposals
 
     # Store the new proposal
-    self.proposals[i] = Proposal({
-        name: _proposalName,
-        voteCount: 0
-    })
+    self.proposals[i] = Proposal(name= _proposalName, voteCount=0)
 
     # Increase the proposal count
     self.amountProposals += 1
@@ -85,7 +82,7 @@ def _winningProposal() -> uint256:
     winning_proposal: uint256 = 0
 
     # Loop through all proposals to find the one with the most votes
-    for i in range(MAX_NUM_PROPOSALS):
+    for i: uint256 in range(MAX_NUM_PROPOSALS):
         if self.proposals[i].voteCount > winning_vote_count:
             winning_vote_count = self.proposals[i].voteCount
             winning_proposal = i
@@ -175,7 +172,7 @@ def _forwardWeight(delegate_with_weight_to_forward: address):
     target: address = self.voters[delegate_with_weight_to_forward].delegate
 
     # Follow the chain of delegations (max depth: 4 to prevent loops)
-    for i in range(4):
+    for i: uint256 in range(4):
         if self._delegated(target):
             target = self.voters[target].delegate
         else:
